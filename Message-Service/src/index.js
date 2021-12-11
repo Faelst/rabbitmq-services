@@ -6,6 +6,7 @@ const { transporter } = require('./config/mailer');
 amqp
   .connect('amqp://localhost')
   .then((conn) => {
+    console.log('-- Service Message.emailSettings-Service is Running --');
     return conn.createChannel();
   })
   .then((ch) => {
@@ -21,30 +22,27 @@ amqp
       const emailTemplatePath = path.join(__dirname, '..', 'email-templates');
 
       const emailTemplate = fs.readFileSync(
-        `${emailTemplatePath}/${message.emailTemplateFileName}`
+        `${emailTemplatePath}/${message.emailSettings.emailTemplateFileName}`
       );
 
       const send = transporter.templateSender(
         {
-          subject: message.subject,
+          subject: message.emailSettings.subject,
           html: emailTemplate,
         },
-        { from: message.from }
+        { from: message.emailSettings.from }
       );
 
       send(
         {
-          to: message.email,
+          to: message.emailSettings.to,
         },
         {
-          name: message.name,
-          company: message.company,
-          reset_link: message.reset_link,
-          unsubscribe: message.unsubscribe,
+          ...message.emailSettings.templateVariables,
         },
-        function (err, info) {
+        (err, info) => {
           if (err) {
-            console.log('Error');
+            console.log('Error', err);
             ch.ackAll(msg);
           } else {
             console.log('Email sent: ' + info.response);

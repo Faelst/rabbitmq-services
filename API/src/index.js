@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 let i = 1;
 app.post('/task', (req, res) => {
   i = i + 1;
-  queue.sendToQueue('fila1', { i, ...req.body });
+  queue.sendToQueue('fila-test', { i, ...req.body });
   res.json({ message: 'Your request will be processed!' });
 });
 
